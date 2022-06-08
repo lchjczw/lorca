@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"reflect"
 )
@@ -49,7 +48,7 @@ var defaultChromeArgs = []string{
 	"--no-first-run",
 	"--no-default-browser-check",
 	"--safebrowsing-disable-auto-update",
-	"--enable-automation",
+	//"--enable-automation",
 	"--password-store=basic",
 	"--use-mock-keychain",
 }
@@ -64,17 +63,16 @@ func New(url, dir string, width, height int, customArgs ...string) (UI, error) {
 	if url == "" {
 		url = "data:text/html,<html></html>"
 	}
-	tmpDir := ""
-	if dir == "" {
-		name, err := ioutil.TempDir("", "lorca")
-		if err != nil {
-			return nil, err
-		}
-		dir, tmpDir = name, name
-	}
+
 	args := append(defaultChromeArgs, fmt.Sprintf("--app=%s", url))
-	args = append(args, fmt.Sprintf("--user-data-dir=%s", dir))
-	args = append(args, fmt.Sprintf("--window-size=%d,%d", width, height))
+
+	if dir != "" {
+		args = append(args, fmt.Sprintf("--user-data-dir=%s", dir))
+	}
+
+	if width != 0 && height != 0 {
+		args = append(args, fmt.Sprintf("--window-size=%d,%d", width, height))
+	}
 	args = append(args, customArgs...)
 	args = append(args, "--remote-debugging-port=0")
 
@@ -88,7 +86,7 @@ func New(url, dir string, width, height int, customArgs ...string) (UI, error) {
 		chrome.cmd.Wait()
 		close(done)
 	}()
-	return &ui{chrome: chrome, done: done, tmpDir: tmpDir}, nil
+	return &ui{chrome: chrome, done: done, tmpDir: dir}, nil
 }
 
 func (u *ui) Done() <-chan struct{} {
