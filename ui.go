@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"reflect"
 )
@@ -63,12 +64,18 @@ func New(url, dir string, width, height int, customArgs ...string) (UI, error) {
 	if url == "" {
 		url = "data:text/html,<html></html>"
 	}
+	tmpDir := ""
+	if dir == "" {
+		name, err := ioutil.TempDir("", "lorca")
+		if err != nil {
+			return nil, err
+		}
+		dir, tmpDir = name, name
+	}
 
 	args := append(defaultChromeArgs, fmt.Sprintf("--app=%s", url))
 
-	if dir != "" {
-		args = append(args, fmt.Sprintf("--user-data-dir=%s", dir))
-	}
+	args = append(args, fmt.Sprintf("--user-data-dir=%s", dir))
 
 	if width != 0 && height != 0 {
 		args = append(args, fmt.Sprintf("--window-size=%d,%d", width, height))
@@ -86,7 +93,7 @@ func New(url, dir string, width, height int, customArgs ...string) (UI, error) {
 		chrome.cmd.Wait()
 		close(done)
 	}()
-	return &ui{chrome: chrome, done: done, tmpDir: dir}, nil
+	return &ui{chrome: chrome, done: done, tmpDir: tmpDir}, nil
 }
 
 func (u *ui) Done() <-chan struct{} {
