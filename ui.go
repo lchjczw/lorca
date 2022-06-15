@@ -64,7 +64,7 @@ func New(url, dir string, width, height int, customArgs ...string) (UI, error) {
 	if url == "" {
 		url = "data:text/html,<html></html>"
 	}
-	tmpDir := ""
+	tmpDir := dir
 	if dir == "" {
 		name, err := ioutil.TempDir("", "lorca")
 		if err != nil {
