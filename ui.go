@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"reflect"
 )
 
@@ -52,6 +51,7 @@ var defaultChromeArgs = []string{
 	//"--enable-automation",
 	"--password-store=basic",
 	"--use-mock-keychain",
+	"--disable-print-preview", // 禁止打印预览系统打印页面
 }
 
 // New returns a new HTML5 UI for the given URL, user profile directory, window
@@ -105,9 +105,9 @@ func (u *ui) Close() error {
 	u.chrome.kill()
 	<-u.done
 	if u.tmpDir != "" {
-		if err := os.RemoveAll(u.tmpDir); err != nil {
-			return err
-		}
+		//if err := os.RemoveAll(u.tmpDir); err != nil {
+		//	return err
+		//}
 	}
 	return nil
 }

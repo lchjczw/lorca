@@ -20,21 +20,31 @@ var fs embed.FS
 // Go types that are bound to the UI must be thread-safe, because each binding
 // is executed in its own goroutine. In this simple case we may use atomic
 // operations, but for more complex cases one should use proper synchronization.
-type counter struct {
+type Message struct {
 	sync.Mutex
-	count int
+	message string
 }
 
-func (c *counter) Add(n int) {
+func (c *Message) Action(action string, ui lorca.UI) {
 	c.Lock()
 	defer c.Unlock()
-	c.count = c.count + n
+	if action == "更新" {
+		c.message = "更新成功"
+		ui.Eval(`
+alert('更新失败');
+`)
+		ui.Close()
+	}
+
+	if action == "取消" {
+		c.message = "取消成功"
+	}
 }
 
-func (c *counter) Value() int {
+func (c *Message) Message() string {
 	c.Lock()
 	defer c.Unlock()
-	return c.count
+	return c.message
 }
 
 func main() {
@@ -54,9 +64,12 @@ func main() {
 	})
 
 	// Create and bind Go object to the UI
-	c := &counter{}
-	ui.Bind("counterAdd", c.Add)
-	ui.Bind("counterValue", c.Value)
+	c := &Message{}
+	ui.Bind("action", func(action string) {
+		c.Action(action, ui)
+	})
+
+	ui.Bind("message", c.Message)
 
 	// Load HTML.
 	// You may also use `data:text/html,<base64>` approach to load initial HTML,

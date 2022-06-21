@@ -19,8 +19,8 @@
 		<div class="counter-container">
 			<div class="counter"></div>
 			<div class="btn-row">
-				<div class="btn btn-incr">+1</div>
-				<div class="btn btn-decr">-1</div>
+				<div class="btn btn-incr">更新</div>
+				<div class="btn btn-decr">取消</div>
 			</div>
 		</div>
 
@@ -32,16 +32,16 @@
 
 			// We use async/await because Go functions are asynchronous
 			const render = async () => {
-				counter.innerText = `Count: ${await window.counterValue()}`;
+				counter.innerText = `${await window.message()}`;
 			};
 
 			btnIncr.addEventListener('click', async () => {
-				await counterAdd(1); // Call Go function
+				await action('更新'); // Call Go function
 				render();
 			});
 
 			btnDecr.addEventListener('click', async () => {
-				await counterAdd(-1); // Call Go function
+				await action('取消'); // Call Go function
 				render();
 			});
 
