@@ -10,8 +10,10 @@ import (
 	"log"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"sync"
 	"sync/atomic"
+	"syscall"
 
 	"golang.org/x/net/websocket"
 )
@@ -57,6 +59,10 @@ func newChromeWithArgs(chromeBinary string, args ...string) (*chrome, error) {
 
 	// Start chrome process
 	c.cmd = exec.Command(chromeBinary, args...)
+	if runtime.GOOS == "windows" {
+		c.cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	}
+
 	pipe, err := c.cmd.StderrPipe()
 	if err != nil {
 		return nil, err
