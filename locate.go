@@ -85,6 +85,8 @@ func PromptDownload() {
 		exec.Command("open", url).Run()
 	case "windows":
 		r := strings.NewReplacer("&", "^&")
-		exec.Command("cmd", "/c", "start", r.Replace(url)).Run()
+		cmd := exec.Command("cmd", "/c", "start", r.Replace(url))
+		HideWindow(cmd)
+		cmd.Run()
 	}
 }
